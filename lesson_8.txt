@@ -1,0 +1,44 @@
+Задание
+Работаем с базой данных учителей teachers.db. Для каждого задания требуется сдать только код, который выполняется для получения результата, в текстовом файле.
+В качестве отчёта к четвёртому заданию надо приложить скриншот.
+1. Найдите общее количество учеников для каждого курса. В отчёт выведите название курса и количество учеников по всем потокам курса. Решите задание с применением
+ оконных функций.
+
+SELECT DISTINCT
+  courses.name,
+  SUM(streams.students_amount) OVER(w_students) AS sum_students
+  FROM streams
+    LEFT JOIN courses
+	  ON streams.course_id = courses.id
+	WINDOW w_students AS (PARTITION BY courses.name);
+
+2. Найдите среднюю оценку по всем потокам для всех учителей. В отчёт выведите идентификатор, фамилию и имя учителя, среднюю оценку по всем проведённым потокам.
+ Учителя, у которых не было потоков, также должны попасть в выборку. Решите задание с применением оконных функций.
+
+SELECT DISTINCT
+teachers.id,
+teachers.name,
+teachers.surname,
+AVG(grades.grade) OVER(w_grades) AS avg_grade
+FROM teachers
+LEFT JOIN grades
+ON teachers.id = grades.teacher_id
+WINDOW w_grades AS (PARTITION BY teacher_id);
+
+3. Какие индексы надо создать для максимально быстрого выполнения представленного запроса?
+SELECT
+  surname,
+  name,
+  number,
+  performance
+FROM academic_performance
+  JOIN teachers
+    ON academic_performance.teacher_id = teachers.id
+  JOIN streams
+    ON academic_performance.stream_id = streams.id
+WHERE number >= 200;
+
+CREATE INDEX teachers_surname_name_idx ON teachers(surname, name);
+CREATE INDEX streams_number_idx ON streams(number);
+
+4. Установите SQLiteStudio, подключите базу данных учителей, выполните в графическом клиенте любой запрос.
